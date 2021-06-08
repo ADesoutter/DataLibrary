@@ -18,12 +18,12 @@ class AuthorFixtures extends Fixture implements DependentFixturesInterface
     public function __construct(UserPasswordEncoderInterface $encoder)
     {
         $this->encoder = $encoder;
-        $this->faker = \Faker\Factory::create('en_US');
+        $this->faker = \Faker\Factory::create('fr_FR');
     }
 
     public function load(ObjectManager $manager)
     {
-        $author = [];
+        $authors = [];
 
         $author = new Author();
         $author->setLastname('unknown author');
@@ -64,12 +64,12 @@ class AuthorFixtures extends Fixture implements DependentFixturesInterface
         $manager->flush();
     }
 
-   /* 
+   /*
     public function getDependencies()
     {
         return [
             userFixtures::class
-        ]
+        ];
     }
     */
 }

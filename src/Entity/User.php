@@ -55,8 +55,8 @@ class User
     public function getRoles(): array
     {
         $roles = $this->roles;
-        // guarantee every user at least has ROLE_USER
-        $roles[] = 'ROLE_USER';
+        // guarantee every user at least has ROLE_EMPRUNTEUR
+        $roles[] = 'ROLE_EMPRUNTEUR';
 
         return array_unique($roles);
     }

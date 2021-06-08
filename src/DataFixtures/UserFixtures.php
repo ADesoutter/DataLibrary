@@ -17,7 +17,7 @@ class UserFixtures extends Fixture implements DependentFixturesInterface
     public function __construct(UserPasswordEncoderInterface $encoder)
     {
         $this->encoder = $encoder;
-        $this->faker = \Faker\Factory::create('en_US');
+        $this->faker = \Faker\Factory::create('fr_FR');
     }
 
     public function load(ObjectManager $manager)

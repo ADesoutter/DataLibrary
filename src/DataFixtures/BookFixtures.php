@@ -8,7 +8,7 @@ use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 
-class BookFixtures extends Fixture implements DependentFixturesInterface
+class BookFixtures extends Fixture
 {
     private $encoder;
     private $faker;
@@ -16,11 +16,11 @@ class BookFixtures extends Fixture implements DependentFixturesInterface
     public function __construct(UserPasswordEncoderInterface $encoder)
     {
         $this->encoder = $encoder;
-        $this->faker = \Faker\Factory::create('en_US');
+        $this->faker = \Faker\Factory::create('fr_FR');
     }
 
-    public function load(ObjectManager $manager);
-
+    public function load(ObjectManager $manager) //, array $books
+    {
 
         $books = [];
 
@@ -31,7 +31,7 @@ class BookFixtures extends Fixture implements DependentFixturesInterface
         $book->setCodeIsbn('9785786930024');
         $manager->persist($book);
 
-        $book[] = $book;
+    //    $book[] = $book;
 
         $book = new Book();
         $book->setTitle('Consectetur adipiscing elit');
@@ -40,7 +40,7 @@ class BookFixtures extends Fixture implements DependentFixturesInterface
         $book->setCodeIsbn('9783817260935');
         $manager->persist($book);
 
-        $book[] = $book;
+    //    $book[] = $book;
 
         $book = new Book();
         $book->setTitle('Mihi quidem Antiochum');
@@ -49,7 +49,7 @@ class BookFixtures extends Fixture implements DependentFixturesInterface
         $book->setCodeIsbn('9782020493727');
         $manager->persist($book);
 
-        $book[] = $book;
+    //    $book[] = $book;
 
         $book = new Book();
         $book->setTitle('Quem audis satis belle');
@@ -58,18 +58,18 @@ class BookFixtures extends Fixture implements DependentFixturesInterface
         $book->setCodeIsbn('979459561353');
         $manager->persist($book);
 
-        $book[] = $book;
+    //    $book[] = $book;
 
-    // Création de livres avec faker et la boucle
+    // Création de livres avec faker et la boucle= \DateTime::createFromFormat('Y-m-d H:i:s');
         for($i = 0; $i < 1000; $i++) {
             $book->setTitle($this->faker->realTextBetween(6-12));
             $book->setYearEdition($this->faker->numberBetween(2000-2020));
             $book->setNumberPages($this->faker->numberBetween(100-300));
             $book->setCodeIsbn($this->faker->isbn13());
             $manager->persist($book);
+            $book[] = $book;
         }
 
-        
         
         // enregistre l'utilisateur dans une référence
         $this->addReference('book_', $book);
