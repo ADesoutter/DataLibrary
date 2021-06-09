@@ -29,48 +29,47 @@ class AuthorFixtures extends Fixture implements DependentFixturesInterface
         $author->setLastname('unknown author');
         $author->setFirstname(' ');
         $manager->persist($author);
-
-        $author[] = $author;
+        $authors[] = $author;
 
         $author = new Author();
         $author->setLastname('Cartier');
         $author->setFirstname('Hugues');
         $manager->persist($author);
-
-        $author[] = $author;
+        $authors[] = $author;
 
         $author = new Author();
         $author->setLastname('Lambert');
         $author->setFirstname('Armand');
         $manager->persist($author);
         $manager->persist($book);
-        $author[] = $author;
+        $authors[] = $author;
 
         $author = new Author();
         $author->setLastname('Moitessier');
         $author->setFirstname('Thomas');
         $manager->persist($author);
-
-        $author[] = $author;
+        $authors[] = $author;
 
     // Création d'auteurs avec faker et la boucle
-        for($i = 0; $i < 500; $i++) {
+        for($i = 1; $i <= 500; $i++) {
             $author = new Author();
             $author->setLastname($this->faker->lastname());
             $author->setFirstname($this->faker->firstname());
             $manager->persist($author);
+            $authors[] = $author;
         }
+        $this->addReference('author_', $author);
         
         $manager->flush();
     }
 
-   /*
+   
     public function getDependencies()
     {
         return [
-            userFixtures::class
+            UserFixtures::class,
         ];
     }
-    */
+
 }
 

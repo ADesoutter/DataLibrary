@@ -3,6 +3,7 @@
 namespace App\DataFixtures;
 
 use App\Entity\Book;
+use App\Entity\User;
 use Faker\Factory as FakerFactory;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
@@ -19,7 +20,7 @@ class BookFixtures extends Fixture
         $this->faker = \Faker\Factory::create('fr_FR');
     }
 
-    public function load(ObjectManager $manager) //, array $books
+    public function load(ObjectManager $manager)
     {
 
         $books = [];
@@ -30,8 +31,7 @@ class BookFixtures extends Fixture
         $book->setNumberPages('100');
         $book->setCodeIsbn('9785786930024');
         $manager->persist($book);
-
-    //    $book[] = $book;
+        $books[] = $book;
 
         $book = new Book();
         $book->setTitle('Consectetur adipiscing elit');
@@ -39,8 +39,7 @@ class BookFixtures extends Fixture
         $book->setNumberPages('150');
         $book->setCodeIsbn('9783817260935');
         $manager->persist($book);
-
-    //    $book[] = $book;
+        $books[] = $book;
 
         $book = new Book();
         $book->setTitle('Mihi quidem Antiochum');
@@ -48,8 +47,7 @@ class BookFixtures extends Fixture
         $book->setNumberPages('200');
         $book->setCodeIsbn('9782020493727');
         $manager->persist($book);
-
-    //    $book[] = $book;
+        $books[] = $book;
 
         $book = new Book();
         $book->setTitle('Quem audis satis belle');
@@ -57,23 +55,34 @@ class BookFixtures extends Fixture
         $book->setNumberPages('250');
         $book->setCodeIsbn('979459561353');
         $manager->persist($book);
-
-    //    $book[] = $book;
+        $books[] = $book;
 
     // Création de livres avec faker et la boucle= \DateTime::createFromFormat('Y-m-d H:i:s');
-        for($i = 0; $i < 1000; $i++) {
+        for($i = 1; $i <= 1000; $i++) {
             $book->setTitle($this->faker->realTextBetween(6-12));
             $book->setYearEdition($this->faker->numberBetween(2000-2020));
             $book->setNumberPages($this->faker->numberBetween(100-300));
             $book->setCodeIsbn($this->faker->isbn13());
             $manager->persist($book);
-            $book[] = $book;
+            $books[] = $book;
         }
 
+    // public static function books(): array
+    // {
+    //     return ['books'];
+    // }
         
         // enregistre l'utilisateur dans une référence
         $this->addReference('book_', $book);
 
         $manager->flush();
     }
+
+    // public function getDependencies()
+    // {
+    //     return [
+    //         AuthorFixtures::class,
+    //     ];
+    // }
+
 }

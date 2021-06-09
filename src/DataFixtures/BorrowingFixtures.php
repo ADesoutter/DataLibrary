@@ -29,7 +29,7 @@ class BorrowingFixtures extends Fixture
         $borrowing->setModificationDate(NULL);
         $manager->persist($borrower);
 
-        $borrowing[] = $borrowing;
+        $borrowings[] = $borrowing;
 
 
         $borrowing = new Borrowing();
@@ -37,7 +37,7 @@ class BorrowingFixtures extends Fixture
         $borrowing->setReturnDate(NULL);
         $manager->persist($borrower);
 
-        $borrowing[] = $borrowing;
+        $borrowings[] = $borrowing;
 
 
         $borrowing = new Borrowing();
@@ -45,10 +45,10 @@ class BorrowingFixtures extends Fixture
         $borrowing->setReturnDate(NULL);
         $manager->persist($borrower);
 
-        $borrowing[] = $borrowing;
+        $borrowings[] = $borrowing;
 
 
-        for($i = 0; $i < 200; $i++) {
+        for($i = 1; $i <= 200; $i++) {
             $borrowing = new Borrowing();
             $borrowing->setBorrowingDate($this->faker->dateTimeThisDecade());
             // création de la date de début
@@ -58,9 +58,12 @@ class BorrowingFixtures extends Fixture
             $borrowing->setReturnDate($returnDate);
             $manager->persist($borrowing);
         }
-            $borrowing[] = $borrowing;
+            $borrowings[] = $borrowing;
 
         $manager->persist($borrowing);
+
+        $this->addReference('borrowing_', $borrowing);
+
         $manager->flush();
     }
 }
