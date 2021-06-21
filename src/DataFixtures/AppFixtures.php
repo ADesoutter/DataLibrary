@@ -10,11 +10,12 @@ use App\Entity\Genre;
 use App\Entity\User;
 use Faker\Factory as FakerFactory;
 use Doctrine\Bundle\FixturesBundle\Fixture;
+use Doctrine\Bundle\FixturesBundle\FixtureGroupInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Persistence\ObjectManager;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 
-class AppFixtures extends Fixture
+class AppFixtures extends Fixture implements FixtureGroupInterface
 {
     private $encoder;
     private $faker;
@@ -25,60 +26,43 @@ class AppFixtures extends Fixture
         $this->faker = \Faker\Factory::create('fr_FR');
     }
 
+    public static function getGroups(): array
+    {
+        // Cette fixture fait partie du groupe "test".
+        // Cela permet de cibler seulement certains fixtures
+        // quand on exécute la commande doctrine:fixtures:load.
+        // Pour que la méthode statique getGroups() soit prise
+        // en compte, il faut que la classe implémente
+        // l'interface FixtureGroupInterface.
+        return ['test'];
+    }
+
     public function load(ObjectManager $manager)
     {
-        // Définition du nombre d'objets qu'il faut créer.
-        $schoolYearCount = 10;
-        $studentsPerSchoolYear = 24;
-        // Le nombre de students à créer dépend du nombre  de
-        // school years et du nombre de students par school year.
-        $studentsCount = $studentsPerSchoolYear * $schoolYearCount;
-        $studentsPerProject = 3;
-
-        // Le nombre de projects à créer dépend du nombre  de
-        // students et du nombre de students par project.
-        if ($studentsCount % $studentsPerProject == 0) {
-            // Il y a suffisamment de projects pour chaque student.
-            // C-à-d que le reste de la division euclidienne (le
-            // modulo) est nulle.
-            // La division renvoit un float, c'est pourquoi il est nécessaire
-            // de type caster la valeur de la division en (int).
-            $projectsCount = (int) ($studentsCount / $studentsPerProject);
-        } else {
-            // Il n'y a pas suffisamment de projects pour chaque student.
-            // C-à-d que le reste de la division euclidienne (le
-            // modulo) n'est pas nulle.
-            // On rajoute un project supplémentaire.
-            // La division renvoit un float, c'est pourquoi il est nécessaire
-            // de type caster la valeur de la division en (int).
-            $projectsCount = (int) ($studentsCount / $studentsPerProject) + 1;
-        }
-
+        
         // Appel des fonctions qui vont créer les objets dans la BDD.
         // La fonction loadAdmins() ne renvoit pas de données mais les autres
         // fontions renvoit des données qui sont nécessaires à d'autres fonctions.
-        $this->loadAdmins($manager, 3);
-        $users = $this->loadAdmins($manager, $schoolYears);
-        // La fonction loadStudents() a besoin de la liste des school years.
-        $authors = $this->loadAuthors($manager, $schoolYears);
-        $books = $this->loadBooks($manager, $schoolYears);
-        $genres = $this->loadGenres($manager, $borrowings, 20);
-        // La fonction loadProjects() a besoin de la liste des students.
-        $borrowings = $this->loadBorrowings($manager, $students, $studentsPerProject);
-        // La fonction loadTeachers() a besoin de la liste des projects.
-        $borrowers = $this->loadBorrowers($manager, $borrowings, 20);
-
-        // @todo créer les clients et les tags
+        $this->loadAdmins($manager);
+        $users = $this->loadAdmins($manager);
+        $authors = $this->loadAuthors($manager, 500);
+        $books = $this->loadBooks($manager, $authors, $genres);
+        $genres = $this->loadGenres($manager, $books);
+        $borrowings = $this->loadBorrowings($manager, $borrowers, $books);
+        $borrowers = $this->loadBorrowers($manager, 100);
 
         // Exécution des requêtes.
         // C-à-d envoi de la requête SQL à la BDD.
         $manager->flush();
     }
 
-    public function loadAdmins(ObjectManager $manager, int $count)
+    public function loadAdmins(ObjectManager $manager)
     {
 
+        // Création d'un tableau d'utilisateurs
         $users = [];
+
+        // nouvel utilisateur avec un role ADMIN
         $user = new User();
         $user->setEmail('admin@example.com');
         $user->setRoles(['ROLE_ADMIN']);
@@ -87,6 +71,8 @@ class AppFixtures extends Fixture
         $manager->persist($user);
         $users[] = $user;
 
+        // QUE FAIRE AVEC LES AUTRES UTILISATEURS
+        // Création de nouveaux utilisateurs avec un role EMPRUNTEUR
         $user = new User();
         $user->setEmail('foo.foo@example.com');
         $user->setRoles(['ROLE_EMPRUNTEUR']);
@@ -122,57 +108,6 @@ class AppFixtures extends Fixture
         }
 
         return $users;
-    }
-
-    public function loadBooks(ObjectManager $manager)
-    {
-
-        $authors = $this->getReference('authors');
-        $books = [];
-
-        $book = new Book();
-        $book->setTitle('Lorem ipsum dolor sit amet');
-        $book->setYearEdition('2010');
-        $book->setNumberPages('100');
-        $book->setCodeIsbn('9785786930024');
-        $manager->persist($book);
-        $books[] = $book;
-
-        $book = new Book();
-        $book->setTitle('Consectetur adipiscing elit');
-        $book->setYearEdition('2011');
-        $book->setNumberPages('150');
-        $book->setCodeIsbn('9783817260935');
-        $manager->persist($book);
-        $books[] = $book;
-
-        $book = new Book();
-        $book->setTitle('Mihi quidem Antiochum');
-        $book->setYearEdition('2012');
-        $book->setNumberPages('200');
-        $book->setCodeIsbn('9782020493727');
-        $manager->persist($book);
-        $books[] = $book;
-
-        $book = new Book();
-        $book->setTitle('Quem audis satis belle');
-        $book->setYearEdition('2013');
-        $book->setNumberPages('250');
-        $book->setCodeIsbn('979459561353');
-        $manager->persist($book);
-        $books[] = $book;
-
-    // Création de livres avec faker et la boucle= \DateTime::createFromFormat('Y-m-d H:i:s');
-        for($i = 1; $i <= 1000; $i++) {
-            $book->setTitle($this->faker->realTextBetween(6,12));
-            $book->setYearEdition($this->faker->numberBetween(2000,2020));
-            $book->setNumberPages($this->faker->numberBetween(100,300));
-            $book->setCodeIsbn($this->faker->isbn13());
-            $manager->persist($book);
-            $books[] = $book;
-        }
-
-        return $books;
     }
 
     public function loadAuthors(ObjectManager $manager)
@@ -215,6 +150,81 @@ class AppFixtures extends Fixture
         return $authors;
     }
 
+
+    public function loadBooks(ObjectManager $manager, array $authors)
+    {
+
+        $authors = $this->getReference('authors');
+        $books = [];
+
+        $book = new Book();
+        $book->setTitle('Lorem ipsum dolor sit amet');
+        $book->setYearEdition('2010');
+        $book->setNumberPages('100');
+        $book->setCodeIsbn('9785786930024');
+        $book->setAuthor($authors[0]);
+        $book->addKind($kinds[0]);
+
+        $manager->persist($book);
+        $books[] = $book;
+
+        $book = new Book();
+        $book->setTitle('Consectetur adipiscing elit');
+        $book->setYearEdition('2011');
+        $book->setNumberPages('150');
+        $book->setCodeIsbn('9783817260935');
+        $book->setAuthor($authors[1]);
+        $book->addKind($kinds[1]);
+
+        $manager->persist($book);
+        $books[] = $book;
+
+        $book = new Book();
+        $book->setTitle('Mihi quidem Antiochum');
+        $book->setYearEdition('2012');
+        $book->setNumberPages('200');
+        $book->setCodeIsbn('9782020493727');
+        $book->setAuthor($authors[2]);
+        $book->addKind($kinds[2]);
+
+        $manager->persist($book);
+        $books[] = $book;
+
+        $book = new Book();
+        $book->setTitle('Quem audis satis belle');
+        $book->setYearEdition('2013');
+        $book->setNumberPages('250');
+        $book->setCodeIsbn('979459561353');
+        $book->setAuthor($authors[3]);
+        $book->addKind($kinds[3]);
+
+        $manager->persist($book);
+        $books[] = $book;
+
+    // Création de livres avec faker et la boucle= \DateTime::createFromFormat('Y-m-d H:i:s');
+        for($i = 0; $i < 1000; $i++) {
+
+            // Choisir un auteur et un genre random 
+            $randomAuthor = $this->faker->randomElement($authors);
+            $randomGenre = $this->faker->randomElement($genres);
+            $book->setTitle($this->faker->realTextBetween($min = 6, $max = 12));
+            $book->setYearEdition($this->faker->numberBetween($min = 2000, $max = 2020));
+            $book->setNumberPages($this->faker->numberBetween($min = 100, $max = 300));
+            $book->setCodeIsbn($this->faker->isbn13());
+
+            // relations : Many to One avec author : set
+            $book->setAuthor($randomAuthor);
+            // relations : Many to Many avec genre : add
+            $book->addGenre($randomGenre);
+
+            $manager->persist($book);
+            $books[] = $book;
+        }
+
+        return $books;
+    }
+
+    
     public function loadGenres(ObjectManager $manager)
     {
 
@@ -307,35 +317,64 @@ class AppFixtures extends Fixture
 
         $borrowings = [];
 
+        // 1er Emprunt
         $borrowing = new Borrowing();
-        $borrowing->setBorrowingDate('2020-02-01 10:00:00');
-        $borrowing->setModificationDate(NULL);
+        $borrowing->setBorrowingDate (\DateTime::createFromFormat('Y-m-d H:i:s','2020-02-01 10:00:00'));
+        $borrowingDate = $borrowing->getBorrowingDate();
+        $modificationDate = \DateTime::createFromFormat('Y-m-d H:i:s',  $borrowingDate->format('Y-m-d H:i:s'));
+        // ajout d'un interval d' 1 mois à la date de début   
+        $modificationDate->add(new \DateInterval('P1M'));
+        $borrowing->setReturnDate($modificationDate);
+        $borrowing->setBorrower($borrowers[0]);
+        $borrowing->setBook($books[0]);
+
+        $manager->persist($borrowing);
+        $borrowings[] = $borrowing;
+
+        // 2ème emprunt
+        $borrowing = new Borrowing();
+        $borrowing->setBorrowingDate(\DateTime::createFromFormat('Y-m-d H:i:s', '2020-03-01 10:00:00'));
+        $borrowingDate = $borrowing->getBorrowingDate();
+        $modificationDate = \DateTime::createFromFormat('Y-m-d H:i:s',  $borrowingDate->format('Y-m-d H:i:s'));
+        // ajout d'un interval d' 1 mois à la date de début
+        $modificationDate->add(new \DateInterval('P1M'));
+        $borrowing->setReturnDate($modificationDate);
+        $borrowing->setBorrower($borrowers[1]);
+        $borrowing->setBook($books[1]);
+
         $manager->persist($borrower);
         $borrowings[] = $borrowing;
 
-
+        // 3ème emprunt
         $borrowing = new Borrowing();
-        $borrowing->setBorrowingDate('2020-03-01 10:00:00');
+        $borrowing->setBorrowingDate(\DateTime::createFromFormat('Y-m-d H:i:s', '2020-04-01 10:00:00'));
+        $borrowingDate = $borrowing->getBorrowingDate();
+        $modificationDate = \DateTime::createFromFormat('Y-m-d H:i:s',  $borrowingDate->format('Y-m-d H:i:s'));
         $borrowing->setReturnDate(NULL);
+        $borrowing->setBorrower($borrowers[2]);
+        $borrowing->setBook($books[2]);
+
         $manager->persist($borrower);
         $borrowings[] = $borrowing;
 
 
-        $borrowing = new Borrowing();
-        $borrowing->setBorrowingDate('2020-04-01 10:00:00');
-        $borrowing->setReturnDate(NULL);
-        $manager->persist($borrower);
-        $borrowings[] = $borrowing;
+        for($i = 0; $i < 200; $i++) {
 
+            // Utilisation du random pour créer des données aléatoires
+            $randomBorrower = $this->faker->randomElement($borrowers);
+            $randomBook = $this->faker->randomElement($books);
 
-        for($i = 1; $i <= 200; $i++) {
             $borrowing = new Borrowing();
-            $borrowing->setBorrowingDate($this->faker->dateTimeThisDecade());
+            $borrowing->setBorrowingDate($this->faker->dateTime());
+            $borrowingDate = $borrowing->getBorrowingDate();
             // création de la date de début
-            $borrowingDate = \DateTime::createFromFormat('Y-m-d H:i:s');
-            // ajout d'un interval de 3 semaines à la date de début
-            $returnDate->add(new \DateInterval('P3W'));
-            $borrowing->setReturnDate($returnDate);
+            $modificationDate = \DateTime::createFromFormat('Y-m-d H:i:s',  $borrowingDate->format('Y-m-d H:i:s'));
+
+            // Relation Many to One avec Borrower
+            $borrowing->setBorrower($randomBorrower);
+            // Relation Many to One avec Book
+            $borrowing->setBook($randomBook);
+
             $manager->persist($borrowing);
             $borrowings[] = $borrowing;
         }
