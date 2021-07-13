@@ -72,6 +72,8 @@ class AppFixtures extends Fixture implements FixtureGroupInterface
         $users[] = $user;
 
         // QUE FAIRE AVEC LES AUTRES UTILISATEURS
+        // Qui ne sont pas ADMIN
+        // Demande à DAISHI :)
         // Création de nouveaux utilisateurs avec un role EMPRUNTEUR
         $user = new User();
         $user->setEmail('foo.foo@example.com');
