@@ -40,16 +40,24 @@ class AppFixtures extends Fixture implements FixtureGroupInterface
     public function load(ObjectManager $manager)
     {
         
+        $borrowerCount = 100;
+        $booksCount = 1000;
+        $authorCount = 500;
+        $genreCount = 10;
+        $borrowingsCount = 200;
+
+        // Création du tableau Genre
+        $listGenre = ['Poésie', 'Nouvelle', 'Roman historique', 'Roman d\'amour', 'Roman d\'aventure', 'Science-fiction', 'Fantaisy', 'Biographie', 'Conte', 'Témoignage', 'Théâtre', 'Essai', 'Journal intime'];
+
         // Appel des fonctions qui vont créer les objets dans la BDD.
         // La fonction loadAdmins() ne renvoit pas de données mais les autres
         // fontions renvoit des données qui sont nécessaires à d'autres fonctions.
         $this->loadAdmins($manager);
-        $users = $this->loadAdmins($manager);
-        $authors = $this->loadAuthors($manager, 500);
-        $books = $this->loadBooks($manager, $authors, $genres);
-        $genres = $this->loadGenres($manager, $books);
-        $borrowings = $this->loadBorrowings($manager, $borrowers, $books);
-        $borrowers = $this->loadBorrowers($manager, 100);
+        $borrowers = $this->loadBorrowers($manager, $borrowerCount);
+        $authors = $this->loadAuthors($manager, $authorCount);
+        $genres = $this->loadKinds($manager, $listGenre);
+        $books = $this->loadBooks($manager, $authors, $genres, $booksCount);
+        $borrowings = $this->loadBorrowings($manager, $borrowers, $books, $borrowingsCount);   
 
         // Exécution des requêtes.
         // C-à-d envoi de la requête SQL à la BDD.
@@ -58,58 +66,14 @@ class AppFixtures extends Fixture implements FixtureGroupInterface
 
     public function loadAdmins(ObjectManager $manager)
     {
-
-        // Création d'un tableau d'utilisateurs
-        $users = [];
-
-        // nouvel utilisateur avec un role ADMIN
+        //L' utilisateur avec un role ADMIN
         $user = new User();
         $user->setEmail('admin@example.com');
         $user->setRoles(['ROLE_ADMIN']);
         $password = $this->encoder->encodePassword($user, '123');
         $user->setPassword($password);
-        $manager->persist($user);
-        $users[] = $user;
 
-        // QUE FAIRE AVEC LES AUTRES UTILISATEURS
-        // Qui ne sont pas ADMIN
-        // Demande à DAISHI :)
-        // Création de nouveaux utilisateurs avec un role EMPRUNTEUR
-        $user = new User();
-        $user->setEmail('foo.foo@example.com');
-        $user->setRoles(['ROLE_EMPRUNTEUR']);
-        $password = $this->encoder->encodePassword($user, '123');
-        $user->setPassword($password);
         $manager->persist($user);
-        $users[] = $user;
-
-        $user = new User();
-        $user->setEmail('bar.bar@example.com');
-        $user->setRoles(['ROLE_EMPRUNTEUR']);
-        $password = $this->encoder->encodePassword($user, '123');
-        $user->setPassword($password);
-        $manager->persist($user);
-        $users[] = $user;
-
-        $user = new User();
-        $user->setEmail('baz.baz@example.com');
-        $user->setRoles(['ROLE_EMPRUNTEUR']);
-        $password = $this->encoder->encodePassword($user, '123');
-        $user->setPassword($password);
-        $manager->persist($user);
-        $users[] = $user;
-
-        for($i = 1; $i <= 100; $i++) {
-        $user = new User();
-        $user->setEmail($this->faker->email());
-        $user->setRoles(['ROLE_EMPRUNTEUR']);
-        $password = $this->encoder->encodePassword($user, '123');
-        $user->setPassword($password);
-        $manager->persist($user);
-        $users[] = $user;
-        }
-
-        return $users;
     }
 
     public function loadAuthors(ObjectManager $manager)
@@ -233,80 +197,79 @@ class AppFixtures extends Fixture implements FixtureGroupInterface
         $genres = [];
 
         $genre = new Genre();
-        $genre->setName("poésie");
+        $genre->setName($listGenre[0]);
         $genre->setDescription("NULL");
         $manager->persist($genre);
         $genres[] = $genre;
 
         $genre = new Genre();
-        $genre->setName("nouvelle");
+        $genre->setName($listGenre[1]);
         $genre->setDescription("NULL");
         $manager->persist($genre);
         $genres[] = $genre;
 
         $genre = new Genre();
-        $genre->setName("roman historique");
+        $genre->setName($listGenre[2]);
         $genre->setDescription("NULL");
         $manager->persist($genre);
         $genres[] = $genre;
 
         $genre = new Genre();
-        $genre->setName("roman d'amour");
+        $genre->setName($listGenre[3]);
         $genre->setDescription("NULL");
         $manager->persist($genre);
         $genres[] = $genre;
 
         $genre = new Genre();
-        $genre->setName("roman d'aventure");
+        $genre->setName($listGenre[4]);
         $genre->setDescription("NULL");
         $manager->persist($genre);
         $genres[] = $genre;
 
         $genre = new Genre();
-        $genre->setName("science-fiction");
+        $genre->setName($listGenre[5]);
         $genre->setDescription("NULL");
         $manager->persist($genre);
         $genres[] = $genre;
 
         $genre = new Genre();
-        $genre->setName("fantasy");
+        $genre->setName($listGenre[6]);
         $genre->setDescription("NULL");
         $manager->persist($genre);
         $genres[] = $genre;
 
         $genre = new Genre();
-        $genre->setName("biographie");
+        $genre->setName($listGenre[7]);
         $genre->setDescription("NULL");
         $manager->persist($genre);
         $genres[] = $genre;
 
         $genre = new Genre();
-        $genre->setName("conte");
+        $genre->setName($listGenre[8]);
         $genre->setDescription("NULL");
         $manager->persist($genre);
         $genres[] = $genre;
 
         $genre = new Genre();
-        $genre->setName("témoignage");
+        $genre->setName($listGenre[9]);
         $genre->setDescription("NULL");
         $manager->persist($genre);
         $genres[] = $genre;
 
         $genre = new Genre();
-        $genre->setName("théâtre");
+        $genre->setName($listGenre[10]);
         $genre->setDescription("NULL");
         $manager->persist($genre);
         $genres[] = $genre;
 
         $genre = new Genre();
-        $genre->setName("essai");
+        $genre->setName($listGenre[11]);
         $genre->setDescription("NULL");
         $manager->persist($genre);
         $genres[] = $genre;
 
         $genre = new Genre();
-        $genre->setName("journal intime");
-        $genre->setDescription("NULL");
+        $genre->setName($listGenre[12]);
         $manager->persist($genre);
         $genres[] = $genre;
 
@@ -419,6 +382,44 @@ class AppFixtures extends Fixture implements FixtureGroupInterface
         $borrower->setModificationDate(NULL);
         $manager->persist($borrower);
         $borrowers[] = $borrower;
+
+
+        // Création de nouveaux utilisateurs avec un role EMPRUNTEUR
+        // Donc les mettre avec les emprunteur
+        
+        $user = new User();
+        $user->setEmail('foo.foo@example.com');
+        $user->setRoles(['ROLE_EMPRUNTEUR']);
+        $password = $this->encoder->encodePassword($user, '123');
+        $user->setPassword($password);
+        $manager->persist($user);
+        $users[] = $user;
+
+        $user = new User();
+        $user->setEmail('bar.bar@example.com');
+        $user->setRoles(['ROLE_EMPRUNTEUR']);
+        $password = $this->encoder->encodePassword($user, '123');
+        $user->setPassword($password);
+        $manager->persist($user);
+        $users[] = $user;
+
+        $user = new User();
+        $user->setEmail('baz.baz@example.com');
+        $user->setRoles(['ROLE_EMPRUNTEUR']);
+        $password = $this->encoder->encodePassword($user, '123');
+        $user->setPassword($password);
+        $manager->persist($user);
+        $users[] = $user;
+
+        for($i = 1; $i <= 100; $i++) {
+        $user = new User();
+        $user->setEmail($this->faker->email());
+        $user->setRoles(['ROLE_EMPRUNTEUR']);
+        $password = $this->encoder->encodePassword($user, '123');
+        $user->setPassword($password);
+        $manager->persist($user);
+        $users[] = $user;
+        }
 
 
         for($i = 1; $i <= 100; $i++) {
