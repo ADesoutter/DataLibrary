@@ -348,96 +348,96 @@ class AppFixtures extends Fixture implements FixtureGroupInterface
  
     }
 
-    public function loadBorrowers(ObjectManager $manager)
+    public function loadBorrowers(ObjectManager $manager, int $count)
     {
 
         $borrowers = [];
 
-        $borrower = new Borrower();
-        $borrower->setLastname('foo');
-        $borrower->setFirstname('foo');
-        $borrower->setPhone('123456789');
-        $borrower->setActif(true);
-        $borrower->setCreationDate('2020-01-01 10:00:00');
-        $borrower->setModificationDate(NULL);
-        $manager->persist($borrower);
-        $borrowers[] = $borrower;
-
-        $borrower = new Borrower();
-        $borrower->setLastname('bar');
-        $borrower->setFirstname('bar');
-        $borrower->setPhone('123456789');
-        $borrower->setActif(false);
-        $borrower->setCreationDate('2020-02-01 11:00:00');
-        $borrower->setModificationDate('2020-05-01 12:00:00');
-        $manager->persist($borrower);
-        $borrowers[] = $borrower;
-
-        $borrower = new Borrower();
-        $borrower->setLastname('foo');
-        $borrower->setFirstname('foo');
-        $borrower->setPhone('123456789');
-        $borrower->setActif(true);
-        $borrower->setCreationDate('2020-03-01 12:00:00');
-        $borrower->setModificationDate(NULL);
-        $manager->persist($borrower);
-        $borrowers[] = $borrower;
-
-
-        // Création de nouveaux utilisateurs avec un role EMPRUNTEUR
-        // Donc les mettre avec les emprunteur
-        
+        // Création d'un User avec un role emprunteur foo
         $user = new User();
         $user->setEmail('foo.foo@example.com');
         $user->setRoles(['ROLE_EMPRUNTEUR']);
         $password = $this->encoder->encodePassword($user, '123');
         $user->setPassword($password);
         $manager->persist($user);
-        $users[] = $user;
 
+        $borrower = new Borrower();
+        $borrower->setLastname('foo');
+        $borrower->setFirstname('foo');
+        $borrower->setPhone('123456789');
+        $borrower->setActif(true);
+        $borrower->setCreationDate(\DateTime::createFromFormat('Y-m-d H:i:s','2020-01-01 10:00:00'));
+        $borrower->setModificationDate(NULL);
+        $borrower->setUser($user);
+        $manager->persist($borrower);
+        $borrowers[] = $borrower;
+
+        // Création d'un User avec un role emprunteur bar
         $user = new User();
         $user->setEmail('bar.bar@example.com');
         $user->setRoles(['ROLE_EMPRUNTEUR']);
         $password = $this->encoder->encodePassword($user, '123');
         $user->setPassword($password);
         $manager->persist($user);
-        $users[] = $user;
 
+        $borrower = new Borrower();
+        $borrower->setLastname('bar');
+        $borrower->setFirstname('bar');
+        $borrower->setPhone('123456789');
+        $borrower->setActif(false);
+        $borrower->setCreationDate(\DateTime::createFromFormat('2020-02-01 11:00:00'));
+        $borrower->setModificationDate(\DateTime::createFromFormat('2020-05-01 12:00:00'));
+        $borrower->setUser($user);
+        $manager->persist($borrower);
+        $borrowers[] = $borrower;
+
+        // Création d'un User avec un role emprunteur baz
         $user = new User();
         $user->setEmail('baz.baz@example.com');
         $user->setRoles(['ROLE_EMPRUNTEUR']);
         $password = $this->encoder->encodePassword($user, '123');
         $user->setPassword($password);
         $manager->persist($user);
-        $users[] = $user;
 
-        for($i = 1; $i <= 100; $i++) {
+        $borrower = new Borrower();
+        $borrower->setLastname('baz');
+        $borrower->setFirstname('baz');
+        $borrower->setPhone('123456789');
+        $borrower->setActif(true);
+        $borrower->setCreationDate(\DateTime::createFromFormat('2020-03-01 12:00:00'));
+        $borrower->setModificationDate(NULL);
+        $borrower->setUser($user);
+        $manager->persist($borrower);
+        $borrowers[] = $borrower;
+
+ 
+        // Création d'une boucle pour générer 100 utilisateurs au total
+        for($i = 3; $i < $count; $i++) {
         $user = new User();
         $user->setEmail($this->faker->email());
         $user->setRoles(['ROLE_EMPRUNTEUR']);
         $password = $this->encoder->encodePassword($user, '123');
         $user->setPassword($password);
         $manager->persist($user);
-        $users[] = $user;
+        
+
+        // Création d'un emprunteur avec des données aléatoires
+        // qui reste dans la boucle afin que chaque emprunteur soit lié à un compte utilisateur
+        $borrower = new Borrower();
+        $borrower->setLastname($this->faker->lastname());
+        $borrower->setFirstname($this->faker->firstname());
+        $borrower->setPhone($this->faker->phoneNumber());
+        $borrower->setActif($this->faker->boolean);
+        // utilisation de DateTimeThisYear
+        $borrower->setCreationDate($this->faker->dateTimeThisYear());
+        $creationDate = \DateTime::createFromFormat('Y-m-d H:i:s');
+        $borrower->setModificationDate($this->faker->dateTimeThisYear());
+        $modificationDate = \DateTime::createFromFormat('Y-m-d H:i:s');
+        $borrower->setUser($user);
+        $manager->persist($borrower);
+        $borrowers[] = $borrower;
         }
-
-
-        for($i = 1; $i <= 100; $i++) {
-            $borrower = new Borrower();
-            $borrower->setLastname($this->faker->lastname());
-            $borrower->setFirstname($this->faker->firstname());
-            $borrower->setPhone($this->faker->phoneNumber());
-            $borrower->setActif($this->faker->boolean);
-            // utilisation de DateTimeThisYear
-            $borrower->setCreationDate($this->faker->dateTimeThisYear());
-            $creationDate = \DateTime::createFromFormat('Y-m-d H:i:s');
-            $borrower->setModificationDate($this->faker->dateTimeThisYear());
-            $modificationDate = \DateTime::createFromFormat('Y-m-d H:i:s');
-
-            $manager->persist($borrower);
-            $borrowers[] = $borrower;
-        }
-
+        
         return $borrowers;
     }
     
