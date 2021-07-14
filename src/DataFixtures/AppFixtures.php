@@ -55,7 +55,7 @@ class AppFixtures extends Fixture implements FixtureGroupInterface
         $this->loadAdmins($manager);
         $borrowers = $this->loadBorrowers($manager, $borrowerCount);
         $authors = $this->loadAuthors($manager, $authorCount);
-        $genres = $this->loadKinds($manager, $listGenre);
+        $genres = $this->loadGenres($manager, $listGenre);
         $books = $this->loadBooks($manager, $authors, $genres, $booksCount);
         $borrowings = $this->loadBorrowings($manager, $borrowers, $books, $borrowingsCount);   
 
@@ -76,28 +76,32 @@ class AppFixtures extends Fixture implements FixtureGroupInterface
         $manager->persist($user);
     }
 
-    public function loadAuthors(ObjectManager $manager)
+    public function loadAuthors(ObjectManager $manager, int $count)
     {
         $authors = [];
 
+        // Création de l'auteur inconnu (id:1)
         $author = new Author();
         $author->setLastname('unknown author');
         $author->setFirstname(' ');
         $manager->persist($author);
         $authors[] = $author;
 
+        // Création de l'auteur (id:2)
         $author = new Author();
         $author->setLastname('Cartier');
         $author->setFirstname('Hugues');
         $manager->persist($author);
         $authors[] = $author;
 
+        // Création de l'auteur (id:3)
         $author = new Author();
         $author->setLastname('Lambert');
         $author->setFirstname('Armand');
         $manager->persist($author);
         $authors[] = $author;
 
+        // Création de l'auteur (id:4)
         $author = new Author();
         $author->setLastname('Moitessier');
         $author->setFirstname('Thomas');
@@ -105,22 +109,20 @@ class AppFixtures extends Fixture implements FixtureGroupInterface
         $authors[] = $author;
 
     // Création d'auteurs avec faker et la boucle
-        for($i = 1; $i <= 500; $i++) {
+        for($i = 3; $i < 500; $i++) {
             $author = new Author();
             $author->setLastname($this->faker->lastname());
             $author->setFirstname($this->faker->firstname());
             $manager->persist($author);
             $authors[] = $author;
         }
-
         return $authors;
     }
 
 
-    public function loadBooks(ObjectManager $manager, array $authors)
+    public function loadBooks(ObjectManager $manager, array $authors, $genres, int $count)
     {
 
-        $authors = $this->getReference('authors');
         $books = [];
 
         $book = new Book();
@@ -129,7 +131,7 @@ class AppFixtures extends Fixture implements FixtureGroupInterface
         $book->setNumberPages('100');
         $book->setCodeIsbn('9785786930024');
         $book->setAuthor($authors[0]);
-        $book->addKind($kinds[0]);
+        $book->addGenre($genres[0]);
 
         $manager->persist($book);
         $books[] = $book;
@@ -140,7 +142,7 @@ class AppFixtures extends Fixture implements FixtureGroupInterface
         $book->setNumberPages('150');
         $book->setCodeIsbn('9783817260935');
         $book->setAuthor($authors[1]);
-        $book->addKind($kinds[1]);
+        $book->addGenre($genres[1]);
 
         $manager->persist($book);
         $books[] = $book;
@@ -151,7 +153,7 @@ class AppFixtures extends Fixture implements FixtureGroupInterface
         $book->setNumberPages('200');
         $book->setCodeIsbn('9782020493727');
         $book->setAuthor($authors[2]);
-        $book->addKind($kinds[2]);
+        $book->addGenre($genres[2]);
 
         $manager->persist($book);
         $books[] = $book;
@@ -162,26 +164,23 @@ class AppFixtures extends Fixture implements FixtureGroupInterface
         $book->setNumberPages('250');
         $book->setCodeIsbn('979459561353');
         $book->setAuthor($authors[3]);
-        $book->addKind($kinds[3]);
+        $book->addGenre($genres[3]);
 
         $manager->persist($book);
         $books[] = $book;
 
-    // Création de livres avec faker et la boucle= \DateTime::createFromFormat('Y-m-d H:i:s');
-        for($i = 0; $i < 1000; $i++) {
+    // Création de livres avec faker et la boucle
+        for($i = 3; $i < $count; $i++) {
 
-            // Choisir un auteur et un genre random 
-            $randomAuthor = $this->faker->randomElement($authors);
-            $randomGenre = $this->faker->randomElement($genres);
             $book->setTitle($this->faker->realTextBetween($min = 6, $max = 12));
             $book->setYearEdition($this->faker->numberBetween($min = 2000, $max = 2020));
             $book->setNumberPages($this->faker->numberBetween($min = 100, $max = 300));
             $book->setCodeIsbn($this->faker->isbn13());
 
             // relations : Many to One avec author : set
-            $book->setAuthor($randomAuthor);
+            $book->setAuthor($this->faker->randomElement($authors));
             // relations : Many to Many avec genre : add
-            $book->addGenre($randomGenre);
+            $book->addGenre($this->faker->randomElement($genres););
 
             $manager->persist($book);
             $books[] = $book;
@@ -191,7 +190,7 @@ class AppFixtures extends Fixture implements FixtureGroupInterface
     }
 
     
-    public function loadGenres(ObjectManager $manager)
+    public function loadGenres(ObjectManager $manager, array $listGenre)
     {
 
         $genres = [];
@@ -277,7 +276,7 @@ class AppFixtures extends Fixture implements FixtureGroupInterface
       
     }
 
-    public function loadBorrowings(ObjectManager $manager)
+    public function loadBorrowings(ObjectManager $manager, array $borrowers, $books, int $count)
     {
 
         $borrowings = [];
@@ -323,11 +322,7 @@ class AppFixtures extends Fixture implements FixtureGroupInterface
         $borrowings[] = $borrowing;
 
 
-        for($i = 0; $i < 200; $i++) {
-
-            // Utilisation du random pour créer des données aléatoires
-            $randomBorrower = $this->faker->randomElement($borrowers);
-            $randomBook = $this->faker->randomElement($books);
+        for($i = 2; $i < $count; $i++) {
 
             $borrowing = new Borrowing();
             $borrowing->setBorrowingDate($this->faker->dateTime());
@@ -336,16 +331,14 @@ class AppFixtures extends Fixture implements FixtureGroupInterface
             $modificationDate = \DateTime::createFromFormat('Y-m-d H:i:s',  $borrowingDate->format('Y-m-d H:i:s'));
 
             // Relation Many to One avec Borrower
-            $borrowing->setBorrower($randomBorrower);
+            $borrowing->setBorrower($this->faker->randomElement($borrowers));
             // Relation Many to One avec Book
-            $borrowing->setBook($randomBook);
+            $borrowing->setBook($this->faker->randomElement($books));
 
             $manager->persist($borrowing);
             $borrowings[] = $borrowing;
         }
-            
         return $borrowings;
- 
     }
 
     public function loadBorrowers(ObjectManager $manager, int $count)
