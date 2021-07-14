@@ -15,7 +15,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Persistence\ObjectManager;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 
-class AppFixtures extends Fixture implements FixtureGroupInterface
+class AppFixtures extends Fixture
 {
     private $encoder;
     private $faker;
@@ -28,23 +28,16 @@ class AppFixtures extends Fixture implements FixtureGroupInterface
 
     public static function getGroups(): array
     {
-        // Cette fixture fait partie du groupe "test".
-        // Cela permet de cibler seulement certains fixtures
-        // quand on exécute la commande doctrine:fixtures:load.
-        // Pour que la méthode statique getGroups() soit prise
-        // en compte, il faut que la classe implémente
-        // l'interface FixtureGroupInterface.
         return ['test'];
     }
 
     public function load(ObjectManager $manager)
     {
-        
-        $borrowerCount = 100;
-        $booksCount = 1000;
         $authorCount = 500;
-        $genreCount = 10;
+        $booksCount = 1000;
+        $borrowerCount = 100;
         $borrowingsCount = 200;
+        $genreCount = 10;
 
         // Création du tableau Genre
         $listGenre = ['Poésie', 'Nouvelle', 'Roman historique', 'Roman d\'amour', 'Roman d\'aventure', 'Science-fiction', 'Fantaisy', 'Biographie', 'Conte', 'Témoignage', 'Théâtre', 'Essai', 'Journal intime'];
@@ -57,7 +50,7 @@ class AppFixtures extends Fixture implements FixtureGroupInterface
         $authors = $this->loadAuthors($manager, $authorCount);
         $genres = $this->loadGenres($manager, $listGenre);
         $books = $this->loadBooks($manager, $authors, $genres, $booksCount);
-        $borrowings = $this->loadBorrowings($manager, $borrowers, $books, $borrowingsCount);   
+        $borrowings = $this->loadBorrowings($manager, $books, $borrowers, $borrowingsCount);   
 
         // Exécution des requêtes.
         // C-à-d envoi de la requête SQL à la BDD.
@@ -180,7 +173,7 @@ class AppFixtures extends Fixture implements FixtureGroupInterface
             // relations : Many to One avec author : set
             $book->setAuthor($this->faker->randomElement($authors));
             // relations : Many to Many avec genre : add
-            $book->addGenre($this->faker->randomElement($genres););
+            $book->addGenre($this->faker->randomElement($genres));
 
             $manager->persist($book);
             $books[] = $book;
